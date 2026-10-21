@@ -48,13 +48,15 @@
 <link rel="alternate" hreflang="x-default" href="https://hushette.khangazun.com/">
 <script src="../family/family.js" defer data-lang="vi" data-page="index.html" data-langs="en,ar,ca,cs,da,de,el,es,fi,fr,he,hi,hr,hu,id,it,ja,ko,ms,nb,nl,pl,pt-br,pt-pt,ro,ru,sk,sv,th,tr,uk,vi,zh-hans,zh-hant"></script>
 <!-- /family:head -->
+<link rel="stylesheet" href="../demo.css">
 </head>
 <body>
 <main>
 <div class="hero">
-  <img class="icon" src="../icon-512.png" alt="" width="112" height="112">
-  <h1>Hushette</h1>
-  <p class="tagline">Âm thanh êm dịu không bao giờ lặp lại, chỉ cách một cú bấm.</p>
+  <div class="hero-pill">⚡ Tạo mới ngay khi phát · Không bao giờ lặp vòng</div>
+  <img class="icon" src="../icon-512.png" alt="Hushette" width="112" height="112">
+  <h1>Âm thanh êm dịu.<br><span class="gradient-text">Không bao giờ lặp lại.</span></h1>
+  <p class="tagline">Tiếng mưa, sóng, gió, lò sưởi, tiếng ồn êm dịu và nhạc thư giãn, được tạo mới ngay khi phát nên không có chỗ nối nào khiến tai bạn để ý.</p>
   <!-- family:stores -->
   <div class="family-stores">
     <a class="family-store" href="https://apps.apple.com/app/id6816441477?platform=mac"><img src="../family/badges/mac-vi.svg" alt="Tải về trên Mac App Store" height="46"></a>
@@ -62,7 +64,8 @@
     <a class="family-store" href="https://play.google.com/store/apps/details?id=azun.hushette.app"><img src="../family/badges/play-vi.png" alt="Tải nội dung trên Google Play" height="46"></a>
   </div>
   <!-- /family:stores -->
-<nav class="links">
+  <p class="platform-banner">Có trên Mac, iPhone, iPad và Android</p>
+  <nav class="links">
     <a href="./">Trang chủ</a>
     <a href="support.html">Hỗ trợ</a>
     <a href="privacy.html">Chính sách quyền riêng tư</a>
@@ -109,11 +112,53 @@
   </nav>
 </div>
 
+<div class="demo-wrapper" id="demo">
+  <div class="hs-box" role="group" aria-label="Bản demo: chọn một âm thanh để xem sóng của nó trôi như thế nào">
+    <canvas id="hs-canvas" class="hs-canvas" aria-hidden="true"></canvas>
+    <div class="hs-chips"><button type="button" class="hs-chip active" data-preset="rain" aria-pressed="true">🌧 Mưa</button><button type="button" class="hs-chip" data-preset="waves" aria-pressed="false">🌊 Sóng</button><button type="button" class="hs-chip" data-preset="wind" aria-pressed="false">🍃 Gió</button></div>
+    <p class="demo-note">Một hình ảnh lặng lẽ minh hoạ ý tưởng: sóng trôi mãi và không lặp lại. Trong ứng dụng, chính âm thanh được tạo ra trên thiết bị của bạn khi phát.</p>
+  </div>
+</div>
+<script>
+(function () {
+  var cv = document.getElementById('hs-canvas'); if (!cv) return;
+  var ctx = cv.getContext('2d'), chips = document.querySelectorAll('.hs-chip'), preset = 'rain', t = 0, run = false, vis = true;
+  var P = { rain: { f: [0.09, 0.173, 0.311], a: [9, 7, 5], s: [0.9, 1.3, 2.1] },
+            waves: { f: [0.011, 0.019, 0.0063], a: [30, 14, 18], s: [0.5, 0.8, 0.27] },
+            wind: { f: [0.021, 0.043, 0.0087], a: [20, 12, 24], s: [1.1, 1.9, 0.6] } };
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function size() { var r = window.devicePixelRatio || 1; cv.width = cv.clientWidth * r; cv.height = cv.clientHeight * r; ctx.setTransform(r, 0, 0, r, 0, 0); }
+  function draw() {
+    var w = cv.clientWidth, h = cv.clientHeight, p = P[preset];
+    ctx.clearRect(0, 0, w, h);
+    ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-text').trim() || '#5b54c9';
+    ctx.beginPath();
+    for (var x = 0; x <= w; x += 3) {
+      var y = h / 2;
+      for (var i = 0; i < 3; i++) y += p.a[i] * Math.sin(x * p.f[i] + t * p.s[i] + i * 1.7) * (0.65 + 0.35 * Math.sin(t * 0.37 + i * 2.1));
+      if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+  function loop() { if (!run) return; t += 0.03; draw(); requestAnimationFrame(loop); }
+  function start() { if (reduce || run || !vis) return; run = true; requestAnimationFrame(loop); }
+  chips.forEach(function (c) { c.addEventListener('click', function () {
+    chips.forEach(function (x) { var on = x === c; x.classList.toggle('active', on); x.setAttribute('aria-pressed', on); });
+    preset = c.getAttribute('data-preset'); draw();
+  }); });
+  size(); draw(); window.addEventListener('resize', function () { size(); draw(); });
+  if ('IntersectionObserver' in window) new IntersectionObserver(function (en) { vis = en[0].isIntersecting; if (vis) start(); else run = false; }).observe(cv); else start();
+  start();
+})();
+</script>
+
+  
+
 <!-- family:shot --><figure class="shot"><img src="../img/hero.jpg" alt="" width="1600" height="860"></figure><!-- /family:shot -->
 <section class="card">
   <h2>Hushette làm gì</h2>
   <p>Trên máy Mac, Hushette nằm trên thanh menu; trên iPhone, iPad và Android, đó là một ứng dụng vẫn phát tiếp khi tắt màn hình. Chọn những âm thanh bạn thích và chỉnh mức của từng âm: tiếng ồn trắng, hồng hoặc nâu, mưa, sấm xa, sóng, gió, suối chảy, dế kêu đêm, chim hót lúc bình minh, quạt hay lò sưởi lách tách.</p>
-  <ul>
+  <ul class="feature-list">
     <li><strong>Không bao giờ lặp vòng.</strong> Mỗi âm thanh được tạo ra ngay khi phát và thay đổi chậm rãi: mưa nặng hạt rồi thưa dần, sóng xô vào từng đợt, gió thổi từng cơn. Không có chỗ nối nào khiến tai bạn để ý, và ứng dụng thì rất nhỏ gọn.</li>
     <li><strong>Yên lặng khi bạn gọi điện.</strong> Khi cuộc gọi bắt đầu, Hushette nhỏ dần rồi im, và to dần trở lại khi cuộc gọi kết thúc.</li>
     <li><strong>Một bản phối cho mỗi khoảng thời gian trong ngày.</strong> Lưu các bản phối như Làm việc, Đọc sách hay Ngủ, rồi để Hushette tự chuyển giữa chúng theo giờ trong lúc đang phát.</li>
@@ -124,6 +169,49 @@
     <li><strong>Không cần mở ứng dụng.</strong> Tác vụ Phím tắt trên Mac, iPhone và iPad; tiện ích màn hình chính trên iPhone, iPad và Android; một điều khiển trong Trung tâm điều khiển trên iOS 18 và một ô Cài đặt nhanh trên Android.</li>
   </ul>
   <p class="note">Yêu cầu macOS 14 Sonoma trở lên, iOS hoặc iPadOS 17 trở lên, hoặc Android 8.0 trở lên. Mua một lần trên App Store là dùng được trên Mac, iPhone và iPad; phiên bản Android có trên Google Play.</p>
+</section>
+
+<section class="card comparison-card" id="comparison">
+  <h2>Bản nhạc lặp vòng so với Hushette</h2>
+  <p class="section-lead">Vì sao âm thanh được tạo ra khi phát dễ chịu hơn khi nghe lâu.</p>
+  <div class="table-scroll">
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Tiêu chí</th>
+          <th>Bản nhạc lặp vòng</th>
+          <th class="highlight-col">Hushette</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Lặp lại</strong></td>
+          <td>Một đoạn ngắn cứ lặp, và chỗ nối có thể làm tai bạn để ý</td>
+          <td class="highlight-col"><strong>Được tạo mới ngay khi phát nên không có chỗ nối</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Dung lượng</strong></td>
+          <td>Các tệp âm thanh dài phải tải về và giữ lại</td>
+          <td class="highlight-col"><strong>Không có gì để tải: âm thanh được tạo ngay trên thiết bị của bạn</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Cuộc gọi</strong></td>
+          <td>Vẫn phát tiếp trong lúc bạn gọi</td>
+          <td class="highlight-col"><strong>Nhỏ dần khi cuộc gọi bắt đầu và to dần trở lại khi kết thúc</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Căn phòng của bạn</strong></td>
+          <td>Một âm thanh cố định cho mọi căn phòng</td>
+          <td class="highlight-col"><strong>Lắng nghe năm giây rồi tạo một tiếng ồn che đi tiếng ồn của phòng bạn, không ghi lại gì</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Mạng</strong></td>
+          <td>Phát trực tuyến cần có kết nối</td>
+          <td class="highlight-col"><strong>Không truy cập mạng chút nào</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </section>
 
 <section class="card">
